@@ -16,11 +16,7 @@ rm -f puppetlabs-release-trusty.deb
 
 # Update the package list
 apt-get update;
-
 apt-get -y install puppet
-
-gem install deep_merge
-
 
 # Upgrade all installed packages incl. kernel and kernel headers
 if [ "$ubuntu_major_version" -lt 14 ]; then

@@ -5,7 +5,7 @@ PUPPET_BRANCH='packer'
 
 echo $USER
 
-# Create backup of puppet dir for later
+# bake backup of current puppet folder
 mv /etc/puppet /etc/puppet.bak
 
 # Check out infrastructure-puppet repo
@@ -16,7 +16,7 @@ gem install r10k
 
 # Grab all 3rdParty puppet modules
 cd /etc/puppet
-./bin/pull $PUPPET_BRANCH
+bin/pull $PUPPET_BRANCH
 
 # Link all the 3rdParty modules for apply
 for i in $(ls /etc/puppet/3rdParty);
@@ -32,4 +32,8 @@ for i in colored cri log4r multi_json multipart faraday faraday_middleware seman
 do
     gem uninstall $i
 done
+
+# restore puppet dir
+rm -rf /etc/puppet
+mv /etc/puppet.bak /etc/puppet
 
