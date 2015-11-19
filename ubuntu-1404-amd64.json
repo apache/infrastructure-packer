@@ -13,10 +13,10 @@
       "format": "qcow2",
       "headless": false,
       "accelerator": "kvm",
-      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
-      "ssh_password": "vagrant",
+      "shutdown_command": "echo 'asf999' | sudo -S shutdown -P now",
+      "ssh_password": "asf999",
       "ssh_port": 22,
-      "ssh_username": "vagrant",
+      "ssh_username": "asf999",
       "ssh_wait_timeout": "10000s",
       "vm_name": "tdhtest",
       "net_device": "virtio-net",
@@ -48,6 +48,31 @@
       ]
     }
   ],
+  "provisioners": [
+    {
+      "destination": "/tmp/bento-metadata.json",
+      "source": "{{user `metadata`}}",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/asf999",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}"
+      ],
+      "execute_command": "echo 'asf999' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "scripts": [
+        "scripts/ubuntu/update.sh",
+        "scripts/ubuntu/networking.sh",
+        "scripts/ubuntu/bootstrap.sh",
+        "scripts/ubuntu/cleanup.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+
   "variables": {
     "box_basename": "ubuntu14",
     "build_timestamp": "{{isotime \"20060102150405\"}}",
