@@ -42,3 +42,24 @@ apt-get -y purge popularity-contest;
 apt-get -y autoremove;
 apt-get -y clean;
 
+# Delete ssh host keys
+rm -rf /etc/ssh/*key*
+
+# Cleanup log files
+cat /dev/null > /var/log/wtmp 2>/dev/null
+logrotate -f /etc/logrotate.conf 2>/dev/null
+find /var/log -type f -exec cat /dev/null > /var/log{} 2>/dev/null \;
+
+# Reset hostname
+hostname localhost
+echo "localhost" > /etc/hostname
+
+# clean up lingering cache files
+rm -f /etc/apt/apt.conf.d/01proxy
+
+# Cleanup puppet certs
+find /etc/puppet -iname "*base*" -delete
+find /var/lib/puppet/ -iname "*apache.org*" -type f -delete
+
+# Finally, enable puppet
+puppet agent --enable
