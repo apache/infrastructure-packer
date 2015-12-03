@@ -43,16 +43,7 @@ apt-get -y autoremove;
 apt-get -y clean;
 
 # Delete ssh host keys
-rm -rf /etc/ssh/*key*
-
-# Cleanup log files
-cat /dev/null > /var/log/wtmp 2>/dev/null
-logrotate -f /etc/logrotate.conf 2>/dev/null
-find /var/log -type f -exec cat /dev/null > /var/log{} 2>/dev/null \;
-
-# Reset hostname
-hostname localhost
-echo "localhost" > /etc/hostname
+rm -rf /etc/ssh/*host*key*
 
 # clean up lingering cache files
 rm -f /etc/apt/apt.conf.d/01proxy
@@ -63,3 +54,69 @@ find /var/lib/puppet/ -iname "*apache.org*" -type f -delete
 
 # Finally, enable puppet
 puppet agent --enable
+
+# Make sure ssh host keys get regen'd at instance startup
+cat > /etc/dhcp/dhclient-exit-hooks.d/sethostname <<'EOM'
+#!/bin/sh
+# dhclient change hostname script for Ubuntu
+# /etc/dhcp/dhclient-exit-hooks.d/sethostname
+# logs in /var/log/upstart/network-interface-eth0.log
+
+# for debugging:
+echo "cloudstack-sethostname BEGIN"
+export
+set -x
+
+if [ $reason = "BOUND" ]; then
+    echo new_ip_address=$new_ip_address
+    echo new_host_name=$new_host_name
+    echo new_domain_name=$new_domain_name
+
+    oldhostname=$(hostname -s)
+    if [ $oldhostname != $new_host_name ]; then
+
+        # Rename Host
+        echo $new_host_name > /etc/hostname
+        hostname -F /etc/hostname
+
+        # Update /etc/hosts if needed
+        TMPHOSTS=/etc/hosts.dhcp.new
+        if ! grep "$new_ip_address $new_host_name.$new_domain_name $new_host_name" /etc/hosts; then
+            # Remove the 127.0.1.1 put there by the debian installer
+            grep -v '127\.0\.1\.1 ' < /etc/hosts > $TMPHOSTS
+            # Add the our new ip address and name
+            echo "$new_ip_address $new_host_name.$new_domain_name $new_host_name" >> $TMPHOSTS
+            mv $TMPHOSTS /etc/hosts
+        fi
+
+        # Recreate SSH2 keys
+        export DEBIAN_FRONTEND=noninteractive 
+        dpkg-reconfigure openssh-server
+    fi
+fi
+echo "cloudstack-sethostname END"
+EOM
+
+# set perms on script
+chmod 774  /etc/dhcp/dhclient-exit-hooks.d/sethostname
+
+# Reset hostname
+hostname localhost
+echo "localhost" > /etc/hostname
+
+cat << \EOF > /etc/hosts
+127.0.0.1   localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+EOF
+
+# Cleanup log files
+cat /dev/null > /var/log/wtmp 2>/dev/null
+logrotate -f /etc/logrotate.conf 2>/dev/null
+find /var/log -type f -delete
