@@ -1,9 +1,12 @@
 #!/bin/bash -eux
 
-PUPPET_REPO='https://github.com/stumped2/infrastructure-puppet.git'
-PUPPET_BRANCH='packer'
+PUPPET_REPO='https://github.com/apache/infrastructure-puppet.git'
+PUPPET_BRANCH='deployment'
 
-# bake backup of current puppet folder
+# Make sure no stray apt.conf is set
+rm -f /etc/apt/apt.conf
+
+# make backup of current puppet folder
 mv /etc/puppet /etc/puppet.bak
 
 # Check out infrastructure-puppet repo
