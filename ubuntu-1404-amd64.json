@@ -9,7 +9,7 @@
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "iso_url": "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
       "output_directory": "packer-{{user `template`}}-qemu",
-      "disk_size": 3000,
+      "disk_size": 25000,
       "format": "qcow2",
       "headless": false,
       "accelerator": "kvm",
