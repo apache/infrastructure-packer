@@ -42,9 +42,6 @@ apt-get -y purge popularity-contest;
 apt-get -y autoremove;
 apt-get -y clean;
 
-# Delete ssh host keys
-rm -rf /etc/ssh/*host*key*
-
 # clean up lingering cache files
 rm -f /etc/apt/apt.conf.d/01proxy
 
@@ -73,7 +70,7 @@ if [ $reason = "BOUND" ]; then
     echo new_domain_name=$new_domain_name
 
     oldhostname=$(hostname -s)
-    if [ $oldhostname != $new_host_name ]; then
+    if [ $oldhostname != 'localhost' ]; then
 
         # Rename Host
         echo $new_host_name > /etc/hostname
@@ -120,3 +117,4 @@ EOF
 cat /dev/null > /var/log/wtmp 2>/dev/null
 logrotate -f /etc/logrotate.conf 2>/dev/null
 find /var/log -type f -delete
+rm -f /var/lib/dhcp/dhclient.*

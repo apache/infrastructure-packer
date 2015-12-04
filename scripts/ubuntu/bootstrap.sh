@@ -9,6 +9,9 @@ rm -f /etc/apt/apt.conf
 # make backup of current puppet folder
 mv /etc/puppet /etc/puppet.bak
 
+# Delete ssh host keys before puppet boostrap
+rm -rf /etc/ssh/*host*key*
+
 # Check out infrastructure-puppet repo
 git clone $PUPPET_REPO --branch $PUPPET_BRANCH --single-branch /etc/puppet
 
