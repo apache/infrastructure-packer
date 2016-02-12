@@ -1,0 +1,96 @@
+{
+  "builders":
+  [
+    {
+      "type": "qemu",
+      "qemuargs": [ [ "-m", "4096" ], [ "-smp", "4"] ],
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_url": "{{user `mirror`}}/{{user `mirror_directory`}}/{{user `iso_name`}}",
+      "output_directory": "packer-{{user `template`}}-qemu",
+      "disk_size": 10000,
+      "format": "qcow2",
+      "headless": false,
+      "accelerator": "kvm",
+      "shutdown_command": "echo 'asf999' | sudo -S shutdown -P now",
+      "ssh_password": "asf999",
+      "ssh_port": 22,
+      "ssh_username": "asf999",
+      "ssh_wait_timeout": "10000s",
+      "vm_name": "tdhtest",
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<esc><wait>",
+        "<esc><wait>",
+        "<enter><wait>",
+        "/install/vmlinuz<wait>",
+        " auto<wait>",
+        " console-setup/ask_detect=false<wait>",
+        " console-setup/layoutcode=us<wait>",
+        " console-setup/modelcode=pc105<wait>",
+        " debconf/frontend=noninteractive<wait>",
+        " debian-installer=en_US<wait>",
+        " fb=false<wait>",
+        " initrd=/install/initrd.gz<wait>",
+        " kbd-chooser/method=us<wait>",
+        " keyboard-configuration/layout=USA<wait>",
+        " keyboard-configuration/variant=USA<wait>",
+        " locale=en_US<wait>",
+        " netcfg/get_domain=apache.org<wait>",
+        " netcfg/get_hostname=base<wait>",
+        " noapic<wait>",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `preseed_path`}}<wait>",
+        " -- <wait>",
+        "<enter><wait>"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/bento-metadata.json",
+      "source": "{{user `metadata`}}",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/asf999",
+        "http_proxy={{user `http_proxy`}}",
+        "https_proxy={{user `https_proxy`}}",
+        "no_proxy={{user `no_proxy`}}"
+      ],
+      "execute_command": "echo 'asf999' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "scripts": [
+        "scripts/ubuntu/update.sh",
+        "scripts/ubuntu/networking.sh",
+        "scripts/ubuntu/bootstrap.sh",
+        "scripts/ubuntu/cleanup.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+
+  "variables": {
+    "box_basename": "ubuntu14",
+    "build_timestamp": "{{isotime \"20060102150405\"}}",
+    "git_revision": "__unknown_git_revision__",
+    "headless": "",
+    "http_proxy": "{{env `http_proxy`}}",
+    "https_proxy": "{{env `https_proxy`}}",
+    "iso_checksum": "a5c02e25a8f6ab335269adb1a6c176edff075093b90854439b4a90fce9b31f28",
+    "iso_checksum_type": "sha256",
+    "iso_name": "ubuntu-14.04.3-server-i386.iso",
+    "metadata": "floppy/dummy_metadata.json",
+    "mirror": "http://ubuntu.osuosl.org/releases",
+    "mirror_directory": "14.04.3",
+    "name": "ubuntu-14.04-i386",
+    "no_proxy": "{{env `no_proxy`}}",
+    "preseed_path": "ubuntu-14.04/preseed.cfg",
+    "template": "ubuntu-14.04-i386",
+    "version": "2.1.TIMESTAMP"
+  }
+
+}
