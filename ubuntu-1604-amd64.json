@@ -11,7 +11,7 @@
       "output_directory": "packer-{{user `template`}}-qemu",
       "disk_size": 10000,
       "format": "qcow2",
-      "headless": false,
+      "headless": true,
       "accelerator": "kvm",
       "shutdown_command": "echo 'asf999' | sudo -S shutdown -P now",
       "ssh_password": "asf999",

@@ -42,6 +42,9 @@ apt-get -y purge popularity-contest;
 apt-get -y autoremove;
 apt-get -y clean;
 
+# Delete debs
+rm /var/cache/apt/archives/*.deb
+
 # clean up lingering cache files
 rm -f /etc/apt/apt.conf.d/01proxy
 
